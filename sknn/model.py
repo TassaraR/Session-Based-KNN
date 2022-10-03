@@ -127,7 +127,7 @@ class SKNN:
                                           size=self._k,
                                           replace=False)
                 # Candidates filtered Randomly
-                filtered_candidates = candidates[:self._k]
+                filtered_candidates = candidates[random][:self._k]
 
         # If there are no candidates return an array of zeros
         if len(filtered_candidates) == 0:
@@ -178,3 +178,7 @@ class SKNN:
             batch[n, :] = rec
 
         return batch
+
+    @property
+    def session_matrix(self):
+        return self._sess_matrix
