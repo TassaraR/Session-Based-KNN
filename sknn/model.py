@@ -32,7 +32,7 @@ class SKNN:
 
         self._sess_matrix = None
         self._item_index = None
-        self._search_range = None
+        self._item_cont_idx_arr = None
         self._sort_samples = None
         self._ignore_products = {0}
 
@@ -61,7 +61,7 @@ class SKNN:
 
         # Set total possible contiguous items.
         max_prod = np.max(sessions)
-        self._search_range = np.arange(0, max_prod + 1)
+        self._item_cont_idx_arr = np.arange(0, max_prod + 1)
 
         # Allocate empty_session matrix
         sess_matrix = np.zeros((sessions.shape[0], max_prod + 1),
@@ -84,15 +84,17 @@ class SKNN:
                     self._item_index[prod] = {i}
 
             # Populate Matrix (assume unique makes the search faster)
-            # WARNING: using assume unique on not unique lists returns pure garbage
-            bool_sess = np.isin(self._search_range, session_products, assume_unique=True)
+            # WARNING: using assume_unique on not unique lists returns pure garbage
+            bool_sess = np.isin(self._item_cont_idx_arr,
+                                session_products,
+                                assume_unique=True)
             self._sess_matrix[i, :] = bool_sess
 
         # Remove unseen products
-        ignore_products = self._search_range[np.isin(self._search_range,
-                                                     self._item_index.keys(),
-                                                     assume_unique=True,
-                                                     invert=True)]
+        ignore_products = self._item_cont_idx_arr[np.isin(self._item_cont_idx_arr,
+                                                          self._item_index.keys(),
+                                                          assume_unique=True,
+                                                          invert=True)]
         self._ignore_products.update(ignore_products)
         self._sess_matrix = csr_matrix(self._sess_matrix)
 
@@ -100,7 +102,7 @@ class SKNN:
 
         # Remove padding from input_session if any.
         input_session = session[session > 0]
-        input_session_bool = np.isin(self._search_range,
+        input_session_bool = np.isin(self._item_cont_idx_arr,
                                      input_session,
                                      assume_unique=True)
 
