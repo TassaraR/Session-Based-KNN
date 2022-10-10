@@ -38,7 +38,8 @@ class SKNN:
 
     def fit(self,
             sessions: np.ndarray,
-            sort_samples: Optional[Union[np.ndarray, list]] = None) -> None:
+            sort_samples: Optional[Union[np.ndarray, list]] = None,
+            disable_progress: bool = False) -> None:
         """
         parameters
         ----------
@@ -49,6 +50,8 @@ class SKNN:
         sort_samples: np.ndarray / list
             array of vectors that'll be used to sort the most similar sessions
             If empty, samples randomly
+
+        disable_progress: bool | default=False
         """
 
         if sort_samples is not None:
@@ -71,7 +74,7 @@ class SKNN:
         self._item_index = dict()
 
         # Populate the matrix with items
-        for i in tqdm(range(len(sessions))):
+        for i in tqdm(range(len(sessions)), disable=disable_progress):
 
             session_products = sessions[i][sessions[i] > 0]
 
@@ -140,7 +143,7 @@ class SKNN:
 
         # Apply similarity function
         if self._similarity == 'jaccard':
-            # Jaccard ddoes not work w/sparse matrices (scipy)
+            # Jaccard does not work w/sparse matrices (scipy)
             candidate_sessions_bool = candidate_sessions_bool.toarray()
 
         # sklearn supports calculating distances w/sparse matrices
